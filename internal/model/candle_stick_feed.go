@@ -11,7 +11,7 @@ type CandleStickData struct {
 	TodayOpen        string `json:"today_open"`        // 今开盘 [O]
 	High             string `json:"high"`              // 最高价 [H]
 	Low              string `json:"low"`               // 最低价 [L]
-	Volume           string `json:"volume"`            //  成交量 [V]
+	Volume           string `json:"volume"`            // 成交量 [V]
 	Turnover         string `json:"turnover"`          // 成交额
 	PERatio          string `json:"pe_ratio"`          // 市盈率
 	MarketCapital    string `json:"market_capital"`    // 股市值
