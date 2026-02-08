@@ -10,6 +10,15 @@ import (
 	"gorm.io/gorm"
 )
 
+func init() {
+	database, err := GetMYSQLConnection()
+	if err != nil {
+		utilities.Info("初始化数据库连接失败, %v", err)
+	}
+
+	database.AutoMigrate(&model.CandleStickData{})
+}
+
 // GetMYSQLConnection 根据全局配置 MYSQL_CONFIG 中的参数，建立并返回一个 GORM 的 MySQL 数据库连接实例。
 // 该函数会依次校验用户名、密码、主机地址、端口和数据库名是否为空或无效；
 // 若校验通过，则使用 DSN（Data Source Name）格式拼接连接字符串，并通过 gorm.Open 打开数据库连接。
@@ -50,8 +59,6 @@ func GetMYSQLConnection() (*gorm.DB, error) {
 		utilities.Error("%s", "连接MySQL数据库失败："+err.Error())
 		return nil, err
 	}
-
-	database.AutoMigrate(&model.CandleStickData{})
 
 	utilities.Info("连接MySQL数据库成功")
 
