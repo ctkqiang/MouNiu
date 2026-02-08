@@ -17,7 +17,9 @@ import (
 func GetCandleStickData(exchange string, tickerSymbol string) (*model.CandleStickData, error) {
 	var candlestickData model.CandleStickData
 
-	url := config.SINA_API + exchange + tickerSymbol
+	tickerId := exchange + tickerSymbol
+	url := config.SINA_API + tickerId
+
 	client := &http.Client{Timeout: 10 * time.Second}
 	request, err := http.NewRequest("GET", url, nil)
 
@@ -27,7 +29,7 @@ func GetCandleStickData(exchange string, tickerSymbol string) (*model.CandleStic
 	}
 
 	request.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-	request.Header.Set("Referer", "https://finance.sina.com.cn")
+	request.Header.Set("Referer", string(config.SINA_REFERER))
 	request.Header.Set("Accept", "*/*")
 	request.Header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
 
@@ -46,7 +48,7 @@ func GetCandleStickData(exchange string, tickerSymbol string) (*model.CandleStic
 	}
 
 	body := string(bodyBytes)
-	if strings.Contains(body, fmt.Sprintf("var hq_str_%s=", tickerSymbol)) {
+	if strings.Contains(body, fmt.Sprintf("var hq_str_%s=", tickerId)) {
 		start := strings.Index(body, "\"")
 		end := strings.LastIndex(body, "\"")
 

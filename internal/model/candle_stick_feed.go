@@ -1,5 +1,7 @@
 package model
 
+import "encoding/json"
+
 type CandleStickData struct {
 	StockName        string `json:"stock_name"`        // 股票名称
 	CurrentPrice     string `json:"current_price"`     // 当前股价 [C]
@@ -14,4 +16,28 @@ type CandleStickData struct {
 	PERatio          string `json:"pe_ratio"`          // 市盈率
 	MarketCapital    string `json:"market_capital"`    // 股市值
 	Updatetime       string `json:"updatetime"`        // 更新时间
+}
+
+func (c *CandleStickData) ToJson() (string, error) {
+	jsonData, err := json.Marshal(c)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonData), nil
+}
+
+func (c *CandleStickData) ToJsonPretty() (string, error) {
+	jsonData, err := json.MarshalIndent(c, "", "    ")
+	if err != nil {
+		return "", err
+	}
+	return string(jsonData), nil
+}
+
+func (c *CandleStickData) ToString() (string, error) {
+	jsonData, err := json.Marshal(c)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonData), nil
 }

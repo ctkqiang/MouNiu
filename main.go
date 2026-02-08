@@ -6,13 +6,12 @@ import (
 )
 
 func main() {
-
-	data, err := services.GetCandleStickData("hk", "01810")
+	// TODO change to dynamic + grpc
+	datafeed, err := services.GetCandleStickData("hk", "01810")
 
 	if err != nil {
 		fmt.Print(err)
 	}
 
-	fmt.Print(data)
-
+	fmt.Print(datafeed.ToJsonPretty())
 }
