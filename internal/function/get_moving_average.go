@@ -37,7 +37,6 @@ func GetExponentialMovingAverage(lastClosingPrice float64, previousEMA float64, 
 		return 0, errors.New("前一EMA值不能为负数")
 	}
 
-	// 检查是否为无效数值
 	if math.IsNaN(lastClosingPrice) || math.IsInf(lastClosingPrice, 0) {
 		return 0, errors.New("收盘价不是有效数值")
 	}
