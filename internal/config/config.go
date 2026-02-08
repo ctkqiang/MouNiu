@@ -13,6 +13,7 @@ type MYSQL_CONFIGURATION struct {
 	Host     string `json:"host"`
 	User     string `json:"user"`
 	Password string `json:"password"`
+	Port     int16  `json:"port"`
 }
 
 var (
@@ -47,5 +48,6 @@ func init() {
 		Database: os.Getenv("MYSQL_DATABASE"),
 		User:     os.Getenv("MYSQL_USER"),
 		Password: os.Getenv("MYSQL_PASSWORD"),
+		Port:     3306,
 	}
 }
