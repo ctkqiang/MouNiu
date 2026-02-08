@@ -23,26 +23,28 @@ type CandleStickData struct {
 	Updatetime       string `json:"更新时间" gorm:"column:更新时间"`
 }
 
-func (c *CandleStickData) ToJson() (string, error) {
-	jsonData, err := json.Marshal(c)
+func (candleData *CandleStickData) ToJson() (string, error) {
+	jsonData, err := json.Marshal(candleData)
 	if err != nil {
 		return "", err
 	}
 	return string(jsonData), nil
 }
 
-func (c *CandleStickData) ToJsonPretty() (string, error) {
-	jsonData, err := json.MarshalIndent(c, "", "    ")
+func (candleData *CandleStickData) ToJsonPretty() (string, error) {
+	jsonData, err := json.MarshalIndent(candleData, "", "    ")
 	if err != nil {
 		return "", err
 	}
+
 	return string(jsonData), nil
 }
 
-func (c *CandleStickData) ToString() (string, error) {
-	jsonData, err := json.Marshal(c)
+func (candleData *CandleStickData) ToString() (string, error) {
+	jsonData, err := json.Marshal(candleData)
 	if err != nil {
 		return "", err
 	}
+
 	return string(jsonData), nil
 }
