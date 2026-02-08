@@ -47,11 +47,13 @@ func GetMYSQLConnection() (*gorm.DB, error) {
 
 	database, err := gorm.Open(mysql.Open(dataSourceName), &gorm.Config{})
 	if err != nil {
-		utilities.Error("%s", "连接 MySQL 数据库失败："+err.Error())
+		utilities.Error("%s", "连接MySQL数据库失败："+err.Error())
 		return nil, err
 	}
 
 	database.AutoMigrate(&model.CandleStickData{})
+
+	utilities.Info("连接MySQL数据库成功")
 
 	return database, nil
 }
