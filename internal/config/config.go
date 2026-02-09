@@ -37,10 +37,10 @@ var (
 
 func init() {
 
-	wd, err := os.Getwd()
+	workspaceDirectory, err := os.Getwd()
 
 	if err == nil {
-		envPath := filepath.Join(wd, "internal", "config", ".env")
+		envPath := filepath.Join(workspaceDirectory, "internal", "config", ".env")
 
 		if _, err := os.Stat(envPath); err == nil {
 			if err := godotenv.Load(envPath); err != nil {
