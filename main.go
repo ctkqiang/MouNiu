@@ -13,5 +13,5 @@ func main() {
 		fmt.Print(err)
 	}
 
-	fmt.Print(datafeed.ToJsonPretty())
+	fmt.Print(datafeed.ToJson())
 }

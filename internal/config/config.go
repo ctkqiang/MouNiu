@@ -8,6 +8,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type QUESTDB_CONFIGURATION struct {
+	Database string `json:"database"`
+	Host     string `json:"host"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Port     int16  `json:"port"`
+}
+
 type MYSQL_CONFIGURATION struct {
 	Database string `json:"database"`
 	Host     string `json:"host"`
@@ -24,7 +32,8 @@ var (
 )
 
 var (
-	MYSQL_CONFIG MYSQL_CONFIGURATION
+	MYSQL_CONFIG   MYSQL_CONFIGURATION
+	QUESTDB_CONFIG QUESTDB_CONFIGURATION
 )
 
 func init() {
@@ -49,5 +58,13 @@ func init() {
 		User:     os.Getenv("MYSQL_USER"),
 		Password: os.Getenv("MYSQL_PASSWORD"),
 		Port:     3306,
+	}
+
+	QUESTDB_CONFIG = QUESTDB_CONFIGURATION{
+		Host:     os.Getenv("QUESTDB_HOST"),
+		Database: os.Getenv("QUESTDB_DB"),
+		User:     os.Getenv("QUESTDB_USER"),
+		Password: os.Getenv("QUESTDB_PASS"),
+		Port:     8812,
 	}
 }
