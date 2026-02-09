@@ -1,13 +1,16 @@
 package services
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"mouniu/internal/config"
 	"mouniu/internal/database"
 	"mouniu/internal/model"
+
 	"mouniu/internal/utilities"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -52,6 +55,7 @@ func GetCandleStickData(exchange string, tickerSymbol string) (*model.CandleStic
 		utilities.Error("%s", "Sina API Error: "+err.Error())
 		return nil, err
 	}
+
 	defer response.Body.Close()
 
 	reader := transform.NewReader(response.Body, simplifiedchinese.GBK.NewDecoder())
@@ -102,4 +106,31 @@ func InsertIntoTable(db *gorm.DB, data *model.CandleStickData) error {
 		data.Timestamp = time.Now()
 	}
 	return db.Create(data).Error
+}
+
+func GetStockConcurrently(filePath string) {
+	exchange := model.ExchangeHK
+
+	symbolsFile, err := os.Open(filePath)
+	if err != nil {
+		fmt.Printf("无法打开符号文件 [%s]: %v\n", filePath, err)
+		return
+	}
+	defer symbolsFile.Close()
+
+	scanner := bufio.NewScanner(symbolsFile)
+	for scanner.Scan() {
+		ticker := strings.TrimSpace(scanner.Text())
+		if ticker == "" {
+			continue
+		}
+
+		datafeed, err := GetCandleStickData(string(exchange), ticker)
+		if err != nil {
+			fmt.Printf("抓取 %s 出错: %v\n", ticker, err)
+			continue
+		}
+
+		fmt.Println(datafeed.ToJson())
+	}
 }
