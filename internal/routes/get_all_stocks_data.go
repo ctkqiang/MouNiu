@@ -7,10 +7,10 @@ import (
 	"gorm.io/gorm"
 )
 
-func Analysis(router *gin.Engine, db *gorm.DB) {
+func GetAllStocks(router *gin.Engine, db *gorm.DB) {
 	public := router.Group("/api")
 	{
-		public.GET("/analysis", func(c *gin.Context) {
+		public.GET("/all", func(c *gin.Context) {
 			c.JSON(http.StatusOK, "ok")
 		})
 	}
