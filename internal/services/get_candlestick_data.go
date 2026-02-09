@@ -19,12 +19,12 @@ import (
 func GetCandleStickData(exchange string, tickerSymbol string) (*model.CandleStickData, error) {
 	var candlestickData model.CandleStickData
 
-	db, err := database.GetQuestDatabaseConnection()
+	questDB, err := database.GetQuestDatabaseConnection()
 	if err != nil {
 		return nil, fmt.Errorf("QuestDB %v", err)
 	}
 
-	migrator := db.Migrator()
+	migrator := questDB.Migrator()
 	if !migrator.HasTable(&model.CandleStickData{}) {
 		if err := migrator.CreateTable(&model.CandleStickData{}); err != nil {
 			utilities.Error("CreateTable Error: %v", err)
@@ -89,7 +89,7 @@ func GetCandleStickData(exchange string, tickerSymbol string) (*model.CandleStic
 	}
 
 	if candlestickData.StockName != "" {
-		if err := InsertIntoTable(db, &candlestickData); err != nil {
+		if err := InsertIntoTable(questDB, &candlestickData); err != nil {
 			utilities.Error("Insert Error: %v", err)
 		}
 	}
