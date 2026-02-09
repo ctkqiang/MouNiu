@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"mouniu/internal/config"
+	"mouniu/internal/database"
 	"mouniu/internal/model"
 	"mouniu/internal/utilities"
 	"net/http"
@@ -12,17 +13,27 @@ import (
 
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
+	"gorm.io/gorm"
 )
 
 func GetCandleStickData(exchange string, tickerSymbol string) (*model.CandleStickData, error) {
 	var candlestickData model.CandleStickData
+
+	database, err := database.GetQuestDatabaseConnection()
+	if err != nil {
+		return nil, fmt.Errorf("QuestDB %v", err)
+	}
+
+	if err := database.AutoMigrate(&model.CandleStickData{}); err != nil {
+		utilities.Error("自动迁移 CandleStickData 表失败: %v", err)
+		return nil, err
+	}
 
 	tickerId := exchange + tickerSymbol
 	url := config.SINA_API + tickerId
 
 	client := &http.Client{Timeout: 10 * time.Second}
 	request, err := http.NewRequest("GET", url, nil)
-
 	if err != nil {
 		utilities.Error("%s", "创建HTTP请求失败: "+err.Error())
 		return nil, err
@@ -65,15 +76,34 @@ func GetCandleStickData(exchange string, tickerSymbol string) (*model.CandleStic
 				candlestickData.TodayOpen = fields[5]
 				candlestickData.High = fields[6]
 				candlestickData.Low = fields[7]
-				candlestickData.Volume = fields[8] + "股"
-				candlestickData.Turnover = fields[9] + "元"
+				candlestickData.Volume = fields[8]
+				candlestickData.Turnover = fields[9]
 				candlestickData.PERatio = fields[10]
 				candlestickData.MarketCapital = fields[11]
 				candlestickData.Updatetime = fields[12]
 			}
-
 		}
 	}
 
+	if err := InsertIntoTable(database, &candlestickData); err != nil {
+		utilities.Error("插入数据失败: %v", err)
+	}
+
 	return &candlestickData, nil
+}
+
+func InsertIntoTable(db *gorm.DB, data *model.CandleStickData) error {
+	if data.Timestamp.IsZero() {
+		data.Timestamp = time.Now()
+	}
+
+	result := db.Create(data)
+
+	if result.Error != nil {
+		return fmt.Errorf("插入失败: %v", result.Error)
+	}
+
+	utilities.Info("已为 %s 插入 1 行数据\n", data.StockName)
+
+	return nil
 }
