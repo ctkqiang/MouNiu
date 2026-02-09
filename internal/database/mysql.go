@@ -14,9 +14,12 @@ func init() {
 	database, err := GetMYSQLConnection()
 	if err != nil {
 		utilities.Info("初始化数据库连接失败, %v", err)
+		return
 	}
 
-	database.AutoMigrate(&model.CandleStickData{})
+	if err := database.AutoMigrate(&model.CandleStickData{}); err != nil {
+		utilities.Error("自动迁移 CandleStickData 表失败: %v", err)
+	}
 }
 
 // GetMYSQLConnection 根据全局配置 MYSQL_CONFIG 中的参数，建立并返回一个 GORM 的 MySQL 数据库连接实例。

@@ -40,15 +40,22 @@ func init() {
 	workspaceDirectory, err := os.Getwd()
 
 	if err == nil {
-		envPath := filepath.Join(workspaceDirectory, "internal", "config", ".env")
+		envPathRoot := filepath.Join(workspaceDirectory, ".env")
+		envPathInternal := filepath.Join(workspaceDirectory, "internal", "config", ".env")
 
-		if _, err := os.Stat(envPath); err == nil {
-			if err := godotenv.Load(envPath); err != nil {
-				utilities.Log(utilities.ERROR, "[CONFIG] WARNING!!! Failed to load [.env] File %s: %v\n", envPath, err)
+		if _, err := os.Stat(envPathRoot); err == nil {
+			if err := godotenv.Load(envPathRoot); err != nil {
+				utilities.Log(utilities.ERROR, "[CONFIG] WARNING!!! Failed to load [.env] File %s: %v\n", envPathRoot, err)
+			}
+		} else if _, err := os.Stat(envPathInternal); err == nil {
+			if err := godotenv.Load(envPathInternal); err != nil {
+				utilities.Log(utilities.ERROR, "[CONFIG] WARNING!!! Failed to load [.env] File %s: %v\n", envPathInternal, err)
 			}
 		} else {
 			godotenv.Load()
 		}
+	} else {
+		godotenv.Load()
 	}
 
 	MYSQL_CONFIG = MYSQL_CONFIGURATION{
