@@ -109,13 +109,12 @@ func InsertIntoTable(db *gorm.DB, data *model.CandleStickData) error {
 }
 
 func GetStockConcurrently(filePath string) {
-	exchange := model.ExchangeHK
-
 	symbolsFile, err := os.Open(filePath)
 	if err != nil {
 		fmt.Printf("无法打开符号文件 [%s]: %v\n", filePath, err)
 		return
 	}
+
 	defer symbolsFile.Close()
 
 	scanner := bufio.NewScanner(symbolsFile)
@@ -125,7 +124,12 @@ func GetStockConcurrently(filePath string) {
 			continue
 		}
 
-		datafeed, err := GetCandleStickData(string(exchange), ticker)
+		tickerSymbol, exchange, err := utilities.FormatTicker(ticker)
+		if err != nil {
+			utilities.Error("股票代码格式错误: %s", err)
+		}
+
+		datafeed, err := GetCandleStickData(strings.ToLower(exchange), tickerSymbol)
 		if err != nil {
 			fmt.Printf("抓取 %s 出错: %v\n", ticker, err)
 			continue

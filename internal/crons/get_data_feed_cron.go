@@ -7,7 +7,7 @@ import (
 )
 
 func RunStockUpdate(c *cron.Cron, filePath string) {
-	c.AddFunc("* * * * *", func() {
+	c.AddFunc("*/5 * * * *", func() {
 		services.GetStockConcurrently(filePath)
 	})
 }
