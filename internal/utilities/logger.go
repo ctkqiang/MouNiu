@@ -11,7 +11,7 @@ import (
 type LogLevel int
 
 const (
-	APP_NAME = "金信流"
+	APP_NAME = "某牛"
 	VERSION  = "1.0.0"
 )
 
@@ -95,9 +95,9 @@ func Log(level LogLevel, format string, a ...interface{}) {
 
 	// 输出带有应用名称和时间戳的格式化日志
 	if color != "" {
-		fmt.Printf("["+APP_NAME+"] %s[%s] [%s] %s%s\n", color, timestamp, levelStr, msg, colorReset)
+		fmt.Printf("[GIN-debug] %s[%s] [%s] %s%s\n", color, timestamp, levelStr, msg, colorReset)
 	} else {
-		fmt.Printf("["+APP_NAME+"] [%s] [%s] %s\n", timestamp, levelStr, msg)
+		fmt.Printf("[GIN-debug] [%s] [%s] %s\n", timestamp, levelStr, msg)
 	}
 }
 

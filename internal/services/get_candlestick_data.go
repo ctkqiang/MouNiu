@@ -7,6 +7,7 @@ import (
 	"mouniu/internal/config"
 	"mouniu/internal/database"
 	"mouniu/internal/model"
+	"sync"
 
 	"mouniu/internal/utilities"
 	"net/http"
@@ -109,6 +110,8 @@ func InsertIntoTable(db *gorm.DB, data *model.CandleStickData) error {
 }
 
 func GetStockConcurrently(filePath string) {
+	const maxConcurrency = 10
+
 	exchange := model.ExchangeHK
 
 	symbolsFile, err := os.Open(filePath)
@@ -118,19 +121,43 @@ func GetStockConcurrently(filePath string) {
 	}
 	defer symbolsFile.Close()
 
+	var tickers []string
 	scanner := bufio.NewScanner(symbolsFile)
 	for scanner.Scan() {
 		ticker := strings.TrimSpace(scanner.Text())
-		if ticker == "" {
-			continue
+		if ticker != "" {
+			tickers = append(tickers, ticker)
 		}
-
-		datafeed, err := GetCandleStickData(string(exchange), ticker)
-		if err != nil {
-			fmt.Printf("抓取 %s 出错: %v\n", ticker, err)
-			continue
-		}
-
-		fmt.Println(datafeed.ToJson())
 	}
+
+	if len(tickers) == 0 {
+		fmt.Println("符号文件中没有有效的股票代码")
+		return
+	}
+
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, maxConcurrency)
+	var mu sync.Mutex
+
+	for _, ticker := range tickers {
+		wg.Add(1)
+		go func(t string) {
+			defer wg.Done()
+
+			sem <- struct{}{}
+			defer func() { <-sem }()
+
+			datafeed, err := GetCandleStickData(string(exchange), t)
+
+			mu.Lock()
+			if err != nil {
+				fmt.Printf("抓取 %s 出错: %v\n", t, err)
+			} else {
+				fmt.Println(datafeed.ToJson())
+			}
+			mu.Unlock()
+		}(ticker)
+	}
+
+	wg.Wait()
 }

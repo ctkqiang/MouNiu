@@ -6,7 +6,7 @@ import (
 )
 
 type CandleStickData struct {
-	Timestamp        time.Time `json:"timestamp" gorm:"column:timestamp;type:timestamp"`
+	Timestamp        time.Time `json:"timestamp" gorm:"column:timestamp;type:TIMESTAMP"`
 	StockName        string    `json:"股票名称" gorm:"column:股票名称;type:SYMBOL"`
 	CurrentPrice     float64   `json:"当前股价" gorm:"column:当前股价"`
 	PriceChange      float64   `json:"涨跌额" gorm:"column:涨跌额"`
