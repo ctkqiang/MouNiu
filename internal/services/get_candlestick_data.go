@@ -20,7 +20,9 @@ import (
 )
 
 func GetCandleStickData(exchange string, tickerSymbol string) (*model.CandleStickData, error) {
-	var candlestickData model.CandleStickData
+	var (
+		candlestickData model.CandleStickData
+	)
 
 	questDB, err := database.GetQuestDatabaseConnection()
 	if err != nil {
@@ -74,6 +76,7 @@ func GetCandleStickData(exchange string, tickerSymbol string) (*model.CandleStic
 			fields := strings.Split(dataStr, ",")
 
 			if len(fields) >= 14 {
+				candlestickData.StockCode = tickerSymbol
 				candlestickData.StockName = fields[0]
 				candlestickData.CurrentPrice = utilities.FormatStringToFloat64AndDecimalTo2(fields[1])
 				candlestickData.PriceChange = utilities.FormatStringToFloat64AndDecimalTo2(fields[2])
@@ -111,7 +114,7 @@ func InsertIntoTable(db *gorm.DB, data *model.CandleStickData) error {
 func GetStockConcurrently(filePath string) {
 	symbolsFile, err := os.Open(filePath)
 	if err != nil {
-		fmt.Printf("无法打开符号文件 [%s]: %v\n", filePath, err)
+		utilities.Error("无法打开符号文件 [%s]: %v\n", filePath, err)
 		return
 	}
 
@@ -131,10 +134,16 @@ func GetStockConcurrently(filePath string) {
 
 		datafeed, err := GetCandleStickData(strings.ToLower(exchange), tickerSymbol)
 		if err != nil {
-			fmt.Printf("抓取 %s 出错: %v\n", ticker, err)
+			utilities.Error("抓取 %s 出错: %v\n", ticker, err)
 			continue
 		}
 
-		fmt.Println(datafeed.ToJson())
+		jsonBytes, err := datafeed.ToJson()
+		if err != nil {
+			utilities.Error("序列化 %s 数据失败: %v", ticker, err)
+			continue
+		}
+
+		utilities.Info("%s", string(jsonBytes))
 	}
 }

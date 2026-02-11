@@ -25,5 +25,21 @@ func GetAllStocks(router *gin.Engine, db *gorm.DB) {
 
 			c.JSON(http.StatusOK, stocks)
 		})
+
+		public.GET("/:ticker", func(c *gin.Context) {
+			ticker := c.Param("ticker")
+			var stocks []model.CandleStickData
+
+			result := db.Where("股票代码 = ?", ticker).Order("timestamp DESC").Find(&stocks)
+
+			if result.Error != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": "无法获取数据: " + result.Error.Error(),
+				})
+				return
+			}
+
+			c.JSON(http.StatusOK, stocks)
+		})
 	}
 }
