@@ -63,6 +63,7 @@ func main() {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("/swagger/doc.json")))
 
 	routes.GetAllStocks(router, database)
+	routes.GetAnnouncements(router, database)
 	routes.Analysis(router, database)
 
 	router.Run(Addr)

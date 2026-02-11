@@ -108,6 +108,7 @@ func InsertIntoTable(db *gorm.DB, data *model.CandleStickData) error {
 	if data.Timestamp.IsZero() {
 		data.Timestamp = time.Now()
 	}
+
 	return db.Create(data).Error
 }
 
