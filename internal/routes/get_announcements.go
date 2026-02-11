@@ -1,23 +1,38 @@
 package routes
 
 import (
+	"mouniu/internal/config"
 	"mouniu/internal/model"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-var (
-	announcements []model.Announcement
-)
-
 func GetAnnouncements(router *gin.Engine, db *gorm.DB) {
-	public := router.Group("/api")
+	public := router.Group(config.API)
 	{
-		public.GET("/announcement/all", func(c *gin.Context) {
+		public.GET(config.ANNOUNCEMENT_ALL, func(c *gin.Context) {
+			var announcements []model.Announcement
 
-			result := db.Order("publish_date DESC").Find(&announcements)
+			// 获取分页参数
+			page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+			pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "20"))
+
+			if page < 1 {
+				page = 1
+			}
+			if pageSize < 1 || pageSize > 100 {
+				pageSize = 20
+			}
+
+			offset := (page - 1) * pageSize
+
+			result := db.Order("publish_date DESC").
+				Limit(pageSize).
+				Offset(offset).
+				Find(&announcements)
 
 			if result.Error != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
@@ -26,12 +41,34 @@ func GetAnnouncements(router *gin.Engine, db *gorm.DB) {
 				return
 			}
 
-			c.JSON(http.StatusOK, announcements)
+			c.JSON(http.StatusOK, gin.H{
+				"data":     announcements,
+				"page":     page,
+				"pageSize": pageSize,
+			})
 		})
 
-		public.GET("/announcement/:symbol", func(c *gin.Context) {
+		public.GET(config.ANNOUNCEMENT_SYMBOLS, func(c *gin.Context) {
 			symbol := c.Param("symbol")
-			result := db.Where("stock_code LIKE ?", "%"+symbol+"%").Order("publish_date DESC").Find(&announcements)
+			var announcements []model.Announcement
+
+			page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+			pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "20"))
+
+			if page < 1 {
+				page = 1
+			}
+			if pageSize < 1 || pageSize > 100 {
+				pageSize = 20
+			}
+
+			offset := (page - 1) * pageSize
+
+			result := db.Where("stock_code LIKE ?", "%"+symbol+"%").
+				Order("publish_date DESC").
+				Limit(pageSize).
+				Offset(offset).
+				Find(&announcements)
 
 			if result.Error != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
@@ -40,7 +77,11 @@ func GetAnnouncements(router *gin.Engine, db *gorm.DB) {
 				return
 			}
 
-			c.JSON(http.StatusOK, announcements)
+			c.JSON(http.StatusOK, gin.H{
+				"data":     announcements,
+				"page":     page,
+				"pageSize": pageSize,
+			})
 		})
 	}
 }

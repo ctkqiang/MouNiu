@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"mouniu/internal/config"
 	"mouniu/internal/model" // 确保导入了你的模型包
 	"net/http"
 
@@ -9,9 +10,9 @@ import (
 )
 
 func GetAllStocks(router *gin.Engine, db *gorm.DB) {
-	public := router.Group("/api")
+	public := router.Group(config.API)
 	{
-		public.GET("/all", func(c *gin.Context) {
+		public.GET(config.STOCKS_ALL, func(c *gin.Context) {
 			var stocks []model.CandleStickData
 
 			result := db.Order("timestamp DESC").Find(&stocks)
@@ -26,7 +27,7 @@ func GetAllStocks(router *gin.Engine, db *gorm.DB) {
 			c.JSON(http.StatusOK, stocks)
 		})
 
-		public.GET("/:ticker", func(c *gin.Context) {
+		public.GET(config.STOCKS_SYMBOL, func(c *gin.Context) {
 			ticker := c.Param("ticker")
 			var stocks []model.CandleStickData
 

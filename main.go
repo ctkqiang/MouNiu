@@ -8,7 +8,6 @@ import (
 	"mouniu/internal/routes"
 	"mouniu/internal/utilities"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -29,17 +28,6 @@ func main() {
 	router := gin.Default()
 
 	router.Use(gin.Recovery())
-	router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
-		return fmt.Sprintf("[VERBOSE] %s | %d | %t | %s | %s | %s | %s\n",
-			param.TimeStamp.Format("2006/01/02 - 15:04:05"),
-			param.StatusCode,
-			param.Latency < 500*time.Millisecond,
-			param.ClientIP,
-			param.Method,
-			param.Path,
-			param.ErrorMessage,
-		)
-	}))
 
 	cronManager := cron_v3.New()
 

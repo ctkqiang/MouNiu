@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"mouniu/internal/config"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -8,9 +9,9 @@ import (
 )
 
 func Analysis(router *gin.Engine, db *gorm.DB) {
-	public := router.Group("/api")
+	public := router.Group(config.API)
 	{
-		public.GET("/analysis", func(c *gin.Context) {
+		public.GET(config.ANALYSIS_ALL, func(c *gin.Context) {
 			c.JSON(http.StatusOK, "ok")
 		})
 	}
