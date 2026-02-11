@@ -14,7 +14,7 @@ func GetAllStocks(router *gin.Engine, db *gorm.DB) {
 		public.GET("/all", func(c *gin.Context) {
 			var stocks []model.CandleStickData
 
-			result := db.Find(&stocks)
+			result := db.Order("timestamp DESC").Find(&stocks)
 
 			if result.Error != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
