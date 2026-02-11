@@ -33,13 +33,22 @@ func GetQuestDatabaseConnection() (*gorm.DB, error) {
 	}
 
 	initTableOnce.Do(func() {
-		if !questDB.Migrator().HasTable(&model.CandleStickData{}) {
-			err := questDB.Migrator().CreateTable(&model.CandleStickData{})
-			if err != nil {
-				utilities.Error("初始化 QuestDB 表失败: %v", err)
-
+		utilities.Info("正在初始化 QuestDB 表...")
+		// 初始化 CandleStickData 表
+		if !questDB.Migrator().HasTable("candle_stick_data") {
+			if err := questDB.Migrator().CreateTable(&model.CandleStickData{}); err != nil {
+				utilities.Error("初始化 QuestDB 表 'candle_stick_data' 失败: %v", err)
 			} else {
 				utilities.Info("QuestDB 表 'candle_stick_data' 创建成功")
+			}
+		}
+
+		// 初始化 Announcement 表
+		if !questDB.Migrator().HasTable("announcements") {
+			if err := questDB.Set("gorm:table_options", "timestamp(publish_date) PARTITION BY DAY WAL").Migrator().CreateTable(&model.Announcement{}); err != nil {
+				utilities.Error("初始化 QuestDB 表 'announcements' 失败: %v", err)
+			} else {
+				utilities.Info("QuestDB 表 'announcements' 创建成功")
 			}
 		}
 	})

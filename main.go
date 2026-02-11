@@ -25,6 +25,7 @@ func main() {
 	cronManager := cron_v3.New()
 
 	crons.RunStockUpdate(cronManager, SymbolsFile)
+	crons.RunAnnouncementUpdate(cronManager, SymbolsFile)
 
 	cronManager.Start()
 	defer cronManager.Stop()

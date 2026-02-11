@@ -1,7 +1,6 @@
 package config
 
 import (
-	"mouniu/internal/utilities"
 	"os"
 	"path/filepath"
 
@@ -28,6 +27,9 @@ var (
 	SINA_URL     = "https://stock.finance.sina.com.cn/hkstock/quotes/"
 	SINA_API     = "https://hq.sinajs.cn/list="
 	SINA_REFERER = "https://finance.sina.com.cn"
+
+	SINA_ANNNOUNCEMENT_SZ = "https://vip.stock.finance.sina.com.cn/corp/view/vCB_AllMemordDetail.php?stockid="
+	SINA_ANNNOUNCEMENT_HK = "https://stock.finance.sina.com.cn/hkstock/notice/"
 )
 
 var (
@@ -36,25 +38,26 @@ var (
 )
 
 func init() {
+	// 尝试从当前目录及上级目录查找 .env
+	currDir, _ := os.Getwd()
+	pathsToTry := []string{
+		filepath.Join(currDir, ".env"),
+		filepath.Join(currDir, "internal", "config", ".env"),
+		filepath.Join(currDir, "..", ".env"),
+		filepath.Join(currDir, "..", "internal", "config", ".env"),
+	}
 
-	workspaceDirectory, err := os.Getwd()
-
-	if err == nil {
-		envPathRoot := filepath.Join(workspaceDirectory, ".env")
-		envPathInternal := filepath.Join(workspaceDirectory, "internal", "config", ".env")
-
-		if _, err := os.Stat(envPathRoot); err == nil {
-			if err := godotenv.Load(envPathRoot); err != nil {
-				utilities.Log(utilities.ERROR, "[CONFIG] WARNING!!! Failed to load [.env] File %s: %v\n", envPathRoot, err)
+	loaded := false
+	for _, p := range pathsToTry {
+		if _, err := os.Stat(p); err == nil {
+			if err := godotenv.Load(p); err == nil {
+				loaded = true
+				break
 			}
-		} else if _, err := os.Stat(envPathInternal); err == nil {
-			if err := godotenv.Load(envPathInternal); err != nil {
-				utilities.Log(utilities.ERROR, "[CONFIG] WARNING!!! Failed to load [.env] File %s: %v\n", envPathInternal, err)
-			}
-		} else {
-			godotenv.Load()
 		}
-	} else {
+	}
+
+	if !loaded {
 		godotenv.Load()
 	}
 
