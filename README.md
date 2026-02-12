@@ -1,76 +1,117 @@
 # 牟牛 (MouNiu) 股票分析系统
 
-这是一个专业的股票数据抓取与技术指标分析系统，专为金融数据分析和量化策略研究设计。系统能够自动抓取股票 K 线数据、计算多种核心技术指标，并提供标准化的 API 接口。
+牟牛 (MouNiu) 是一个基于 Go 语言开发的高性能股票数据抓取与技术指标分析系统。该系统集成了实时行情采集、多维技术指标计算、自动化公告监控以及标准化的 RESTful API 服务，旨在为量化交易和金融数据研究提供坚实的数据基础。
 
-## 🌸 项目简介
+## 项目架构
 
-“牟牛”系统由大姐为你精心打造，旨在提供稳定、高效、专业的股票分析基础服务。系统采用时序数据库 QuestDB 存储海量价格数据，并通过定时任务自动化完成复杂的指标计算逻辑。
+系统采用分层架构设计，确保了代码的可维护性与扩展性：
 
-## 🚀 核心功能
+1.  **数据采集层 (Data Acquisition)**：通过高性能并发机制从新浪财经等外部 API 抓取实时 K 线数据及上市公司公告。
+2.  **逻辑处理层 (Business Logic)**：基于递归算法和高效切片操作实现技术指标计算，确保逻辑严谨且运行高效。
+3.  **持久化层 (Persistence)**：使用高性能时序数据库 QuestDB 存储海量价格数据和指标结果，通过 LATEST ON 等特性优化查询性能。
+4.  **接口层 (API Service)**：基于 Gin 框架提供高性能的 RESTful 接口，并集成 Swagger 生成标准化文档。
 
-- **实时/历史数据抓取**：集成新浪财经 API，支持 A 股、港股等多种标的的 K 线数据采集。
-- **自动化指标计算**：
-  - **MACD (12, 26, 9)**：趋势追踪利器。
-  - **布林带 (Bollinger Bands, 20, 2)**：波动率分析。
-  - **神奇九转 (TD9)**：发现超买超跌的转折点。
-  - **RSI (14)**：相对强弱指标。
-  - **SMA (20)**：简单移动平均线。
-- **公告爬取**：自动监控并存储上市公司的最新公告信息。
-- **专业 API 服务**：基于 Gin 框架，提供完善的 RESTful 接口及 Swagger 文档支持。
+## 目录结构说明
 
-## 🛠 技术栈
-
-- **语言**：Go (Golang) 1.25+
-- **框架**：Gin Web Framework
-- **数据库**：QuestDB (高性能时序数据库)
-- **ORM**：GORM
-- **文档**：Swagger (swag)
-- **调度**：robfig/cron/v3
-
-## 📦 快速开始
-
-### 1. 环境准备
-确保你已经安装了 Go 语言环境和 QuestDB 数据库。
-
-### 2. 安装依赖
-```bash
-go mod tidy
+```text
+MouNiu/
+├── contract/             # 协议定义文件 (如 Protobuf)
+├── docs/                 # 自动生成的 Swagger API 文档
+├── internal/
+│   ├── config/           # 全局配置、API 终端定义及股票代码列表
+│   ├── crons/            # 定时任务调度逻辑 (价格更新、指标计算、公告采集)
+│   ├── database/         # 数据库连接驱动 (QuestDB, MySQL)
+│   ├── function/         # 核心技术指标算法实现 (MACD, Bollinger, TD9, RSI, SMA)
+│   ├── model/            # 领域模型与数据结构定义
+│   ├── routes/           # API 路由注册与控制器 Handler 实现
+│   ├── services/         # 业务逻辑服务 (数据抓取、指标持久化逻辑)
+│   └── utilities/        # 通用工具库 (格式化、日志管理)
+├── test/                 # 单元测试与集成测试
+├── main.go               # 应用程序入口
+└── README.md             # 项目说明文档
 ```
 
-### 3. 生成 API 文档
-```bash
-swag init -g main.go --parseDependency --parseInternal
-```
+## 技术指标实现详情
 
-### 4. 运行系统
-```bash
-go run main.go
-```
+系统实现了多种核心金融技术指标，计算逻辑均经过严格测试：
 
-## 📊 数据库查询指南 (QuestDB)
+*   **MACD (12, 26, 9)**：采用递归指数移动平均 (EMA) 算法计算 DIF 和 DEA，并生成 MACD 柱状图数据。
+*   **布林带 (Bollinger Bands, 20, 2)**：计算 20 日简单移动平均线作为中轨，结合标准差计算上下轨，用于分析股价波动区间。
+*   **神奇九转 (TD9)**：通过对比连续 4 日的收盘价，识别趋势中的转折点，支持买入结构和卖出结构的自动判定。
+*   **RSI (14)**：相对强弱指标，用于衡量股价变动的速度和变化，判定超买或超跌状态。
+*   **SMA (20)**：简单移动平均线，反映股价的长期运行趋势。
 
-系统推荐使用 QuestDB 的 `LATEST ON` 语法来获取股票的最新状态：
+## 数据同步与调度机制
+
+系统内置了完善的 Cron 调度任务，确保数据的实时性与一致性：
+
+*   **行情更新 (5分钟/次)**：并发抓取 `symbols.txt` 中配置的所有股票实时行情。
+*   **指标重算 (10分钟/次)**：对历史价格序列进行全量分析，将计算结果存入 `stock_indicators` 表。
+*   **公告监控 (3小时/次)**：自动采集并同步深交所、港交所等市场的上市公司公告。
+
+## 数据库查询优化 (QuestDB)
+
+针对时序数据的特性，系统在查询层进行了针对性优化。推荐使用 `LATEST ON` 语法获取最新状态，以减少全表扫描：
 
 ```sql
--- 获取特定股票的最新的 K 线数据
+-- 获取特定股票最新的行情记录
 SELECT * FROM candle_stick_data 
 WHERE 股票代码 = 'SH600519' 
 LATEST ON timestamp PARTITION BY 股票代码;
 
--- 获取所有股票的最新的技术指标分析
+-- 获取所有股票最新的指标分析结果
 SELECT * FROM stock_indicators 
 LATEST ON timestamp PARTITION BY stock_code;
 ```
 
-## 🕒 定时任务配置
+## API 文档与接入
 
-- **每 5 分钟**：自动抓取最新的股票价格数据。
-- **每 10 分钟**：全量重新计算所有股票的技术指标。
-- **每 3 小时**：抓取最新的上市公司公告。
+系统集成 Swagger (OpenAPI 2.0)，启动后可通过以下地址访问交互式文档：
 
-## 📖 API 文档
-
-系统启动后，可以通过以下地址访问交互式 Swagger 文档：
 `http://localhost:8080/swagger/index.html`
 
+接口涵盖了股票历史数据查询、实时价格获取、最新指标分析结果以及公告信息检索。
 
+### **常用 API 调用示例 (cURL)**
+
+以下是一些常用的接口调用示例，你可以直接在终端中运行：
+
+*   **获取所有股票的最新的技术指标分析**：
+    ```bash
+    curl http://localhost:8080/api/analysis
+    ```
+*   **获取特定股票 (如 贵州茅台 SH600519) 的最新指标**：
+    ```bash
+    curl http://localhost:8080/api/analysis/SH600519
+    ```
+*   **获取特定股票的所有历史 K 线数据**：
+    ```bash
+    curl http://localhost:8080/api/SH600519
+    ```
+*   **获取特定股票的当前最新价格记录**：
+    ```bash
+    curl http://localhost:8080/api/current/SH600519
+    ```
+*   **分页获取所有上市公司的公告**：
+    ```bash
+    curl "http://localhost:8080/api/announcement/all?page=1&pageSize=10"
+    ```
+*   **查询特定股票代码相关的公告**：
+    ```bash
+    curl "http://localhost:8080/api/announcement/600519?page=1&pageSize=5"
+    ```
+
+## 开发与部署
+
+### 环境依赖
+*   Go 1.25 或更高版本
+*   QuestDB 8.0+
+
+### 编译运行
+1.  安装依赖：`go mod tidy`
+2.  更新文档：`swag init -g main.go --parseDependency --parseInternal`
+3.  启动服务：`go run main.go`
+
+## 许可证
+
+本项目采用 Apache License 2.0 许可证。
