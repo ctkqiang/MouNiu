@@ -10,5 +10,6 @@ var (
 	STOCKS_SYMBOL               string = "/:ticker"
 	STOCKS_SYMBOL_CURRENT_PRICE string = "/current/:ticker"
 
-	ANALYSIS_ALL string = "/analysis"
+	ANALYSIS_ALL    string = "/analysis"
+	ANALYSIS_SYMBOL string = "/analysis/:symbol"
 )

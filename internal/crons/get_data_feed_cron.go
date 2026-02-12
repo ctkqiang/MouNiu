@@ -16,6 +16,12 @@ func RunStockUpdate(c *cron.Cron, filePath string) {
 	})
 }
 
+func RunIndicatorUpdate(c *cron.Cron, filePath string) {
+	c.AddFunc("*/5 * * * *", func() {
+		services.CalculateAllIndicators(filePath)
+	})
+}
+
 func RunAnnouncementUpdate(c *cron.Cron, filePath string) {
 	c.AddFunc("0 */3 * * *", func() {
 		file, err := os.Open(filePath)

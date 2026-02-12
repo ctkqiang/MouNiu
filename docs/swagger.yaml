@@ -1,0 +1,275 @@
+basePath: /api
+definitions:
+  model.CandleStickData:
+    properties:
+      timestamp:
+        type: string
+      今开盘:
+        type: number
+      市盈率:
+        type: number
+      当前股价:
+        type: number
+      成交量:
+        type: number
+      成交额:
+        type: number
+      昨收盘:
+        type: number
+      更新时间:
+        type: string
+      最低价:
+        type: number
+      最高价:
+        type: number
+      涨跌幅:
+        type: number
+      涨跌额:
+        type: number
+      股市值:
+        type: number
+      股票代码:
+        type: string
+      股票名称:
+        type: string
+    type: object
+  model.StockIndicator:
+    properties:
+      boll_lower:
+        type: number
+      boll_middle:
+        type: number
+      boll_upper:
+        description: 布林带指标
+        type: number
+      macd_dea:
+        type: number
+      macd_dif:
+        description: MACD 指标
+        type: number
+      macd_hist:
+        type: number
+      rsi:
+        description: RSI 指标
+        type: number
+      sma_20:
+        description: 移动平均线
+        type: number
+      stock_code:
+        type: string
+      stock_name:
+        type: string
+      td9_count:
+        description: 神奇九转指标
+        type: integer
+      td9_is_buy_setup:
+        type: boolean
+      td9_is_sell_setup:
+        type: boolean
+      timestamp:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: John Melody
+    url: https://github.com/johnmelodyme
+  description: 这是一个专业的股票数据抓取与技术指标分析系统。支持 MACD、布林带、神奇九转等多种指标。
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: 牟牛 (MouNiu) 股票分析系统 API
+  version: "1.0"
+paths:
+  /{ticker}:
+    get:
+      description: 根据股票代码获取其所有的历史 K 线数据记录
+      parameters:
+      - description: 股票代码 (如 SH600519)
+        in: path
+        name: ticker
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.CandleStickData'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 获取特定股票的历史价格数据
+      tags:
+      - 股票数据
+  /analysis:
+    get:
+      description: 获取数据库中每只股票最新的一条指标计算记录，包括 MACD、布林带、RSI 等
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.StockIndicator'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 获取所有股票的最新指标分析结果
+      tags:
+      - 指标分析
+  /analysis/{symbol}:
+    get:
+      description: 根据股票代码获取其最近一次计算的技术指标数据
+      parameters:
+      - description: 股票代码 (如 SH600519)
+        in: path
+        name: symbol
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.StockIndicator'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 获取特定股票的最新指标分析结果
+      tags:
+      - 指标分析
+  /announcement/{symbol}:
+    get:
+      description: 根据股票代码模糊查询其相关的公告信息
+      parameters:
+      - description: 股票代码 (如 600519)
+        in: path
+        name: symbol
+        required: true
+        type: string
+      - description: 页码 (默认 1)
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量 (默认 20, 最大 100)
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 获取特定股票的公告
+      tags:
+      - 公告
+  /announcement/all:
+    get:
+      description: 分页获取所有上市公司的最新公告信息
+      parameters:
+      - description: 页码 (默认 1)
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量 (默认 20, 最大 100)
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 获取所有股票公告
+      tags:
+      - 公告
+  /current/{ticker}:
+    get:
+      description: 获取指定股票最新的一条价格记录
+      parameters:
+      - description: 股票代码 (如 SH600519)
+        in: path
+        name: ticker
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.CandleStickData'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 获取特定股票的当前实时价格
+      tags:
+      - 股票数据
+  /stocks/all:
+    get:
+      description: 从数据库中检索所有股票的历史 K 线数据，按时间倒序排列
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.CandleStickData'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 获取所有股票的历史价格数据
+      tags:
+      - 股票数据
+swagger: "2.0"

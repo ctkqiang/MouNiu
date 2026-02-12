@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	_ "mouniu/docs" // 导入生成的 swagger 文档
 	"mouniu/internal/crons"
 	"mouniu/internal/database"
 	"mouniu/internal/routes"
@@ -22,6 +23,19 @@ var (
 	Port        = 8080
 )
 
+// @title 牟牛 (MouNiu) 股票分析系统 API
+// @version 1.0
+// @description 这是一个专业的股票数据抓取与技术指标分析系统。支持 MACD、布林带、神奇九转等多种指标。
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name John Melody
+// @contact.url https://github.com/johnmelodyme
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /api
 func main() {
 	gin.SetMode(gin.DebugMode)
 
@@ -30,10 +44,9 @@ func main() {
 	router.Use(gin.Recovery())
 
 	cronManager := cron_v3.New()
-
 	crons.RunStockUpdate(cronManager, SymbolsFile)
+	crons.RunIndicatorUpdate(cronManager, SymbolsFile)
 	crons.RunAnnouncementUpdate(cronManager, SymbolsFile)
-
 	cronManager.Start()
 	defer cronManager.Stop()
 

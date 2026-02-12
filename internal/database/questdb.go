@@ -51,6 +51,15 @@ func GetQuestDatabaseConnection() (*gorm.DB, error) {
 				utilities.Info("QuestDB 表 'announcements' 创建成功")
 			}
 		}
+
+		// 初始化 StockIndicator 表
+		if !questDB.Migrator().HasTable("stock_indicators") {
+			if err := questDB.Set("gorm:table_options", "timestamp(timestamp) PARTITION BY DAY WAL").Migrator().CreateTable(&model.StockIndicator{}); err != nil {
+				utilities.Error("初始化 QuestDB 表 'stock_indicators' 失败: %v", err)
+			} else {
+				utilities.Info("QuestDB 表 'stock_indicators' 创建成功")
+			}
+		}
 	})
 
 	utilities.Info("连接QuestDB成功 |> %s", dataSourceName)
