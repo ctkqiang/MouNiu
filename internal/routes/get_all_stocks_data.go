@@ -31,7 +31,29 @@ func GetAllStocks(router *gin.Engine, db *gorm.DB) {
 			ticker := c.Param("ticker")
 			var stocks []model.CandleStickData
 
-			result := db.Where("股票代码 = ?", ticker).Order("timestamp DESC").Find(&stocks)
+			// QuestDB 中文列名需要加双引号
+			result := db.Where("\"股票代码\" = ?", ticker).Order("timestamp DESC").Find(&stocks)
+
+			if result.Error != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": "无法获取数据: " + result.Error.Error(),
+				})
+				return
+			}
+
+			c.JSON(http.StatusOK, stocks)
+		})
+
+		public.GET(config.STOCKS_SYMBOL_CURRENT_PRICE, func(c *gin.Context) {
+			ticker := c.Param("ticker")
+			var stocks []model.CandleStickData
+
+			// QuestDB 不支持 DISTINCT ON，且中文列名需要加双引号
+			// 对于单个股票获取当前价格，直接按时间倒序取第一条即可
+			result := db.Where("\"股票代码\" = ?", ticker).
+				Order("timestamp DESC").
+				Limit(1).
+				Find(&stocks)
 
 			if result.Error != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
