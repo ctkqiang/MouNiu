@@ -9,16 +9,10 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - mysql
       - questdb
     environment:
       - APP_NAME=MouNiu
       - APP_PORT=8000
-      - MYSQL_HOST=mysql
-      - MYSQL_PORT=3306
-      - MYSQL_DATABASE=mouniu
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=root
       - QUESTDB_DB=questdb
       - QUESTDB_HOST=questdb
       - QUESTDB_USER=admin
@@ -27,18 +21,7 @@ services:
     networks:
       - mouniu-network
 
-  # MySQL数据库服务
-  mysql:
-    image: mysql:8.0
-    ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=mouniu
-    volumes:
-      - mysql-data:/var/lib/mysql
-    networks:
-      - mouniu-network
+
 
   # QuestDB服务
   questdb:
@@ -53,7 +36,6 @@ services:
       - mouniu-network
 
 volumes:
-  mysql-data:
   questdb-data:
 
 networks:

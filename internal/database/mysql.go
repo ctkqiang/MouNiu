@@ -3,25 +3,12 @@ package database
 import (
 	"fmt"
 	"mouniu/internal/config"
-	"mouniu/internal/model"
 	"mouniu/internal/utilities"
 	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
-
-func init() {
-	database, err := GetMYSQLConnection()
-	if err != nil {
-		utilities.Info("初始化数据库连接失败, %v", err)
-		return
-	}
-
-	if err := database.AutoMigrate(&model.CandleStickData{}); err != nil {
-		utilities.Error("自动迁移 CandleStickData 表失败: %v", err)
-	}
-}
 
 // GetMYSQLConnection 根据全局配置 MYSQL_CONFIG 中的参数，建立并返回一个 GORM 的 MySQL 数据库连接实例。
 // 该函数会依次校验用户名、密码、主机地址、端口和数据库名是否为空或无效；

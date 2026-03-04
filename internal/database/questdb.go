@@ -52,7 +52,7 @@ func GetQuestDatabaseConnection() (*gorm.DB, error) {
 		utilities.Info("正在初始化 QuestDB 表...")
 		// 初始化 CandleStickData 表
 		if !questDB.Migrator().HasTable("candle_stick_data") {
-			if err := questDB.Set("gorm:table_options", "timestamp(publish_date) PARTITION BY DAY WAL").Migrator().CreateTable(&model.CandleStickData{}); err != nil {
+			if err := questDB.Set("gorm:table_options", "timestamp(timestamp) PARTITION BY DAY WAL").Migrator().CreateTable(&model.CandleStickData{}); err != nil {
 				utilities.Error("初始化 QuestDB 表 'candle_stick_data' 失败: %v", err)
 			} else {
 				utilities.Info("QuestDB 表 'candle_stick_data' 创建成功")
