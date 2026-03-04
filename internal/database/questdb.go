@@ -6,6 +6,7 @@ import (
 	"mouniu/internal/model"
 	"mouniu/internal/utilities"
 	"sync"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -24,9 +25,24 @@ func GetQuestDatabaseConnection() (*gorm.DB, error) {
 		config.QUESTDB_CONFIG.Database,
 	)
 
-	questDB, err := gorm.Open(postgres.Open(dataSourceName), &gorm.Config{
-		DisableForeignKeyConstraintWhenMigrating: true,
-	})
+	var questDB *gorm.DB
+	var err error
+	maxRetries := 10
+	retryInterval := 5 * time.Second
+
+	// 尝试连接QuestDB，失败时重试
+	for i := 0; i < maxRetries; i++ {
+		questDB, err = gorm.Open(postgres.Open(dataSourceName), &gorm.Config{
+			DisableForeignKeyConstraintWhenMigrating: true,
+		})
+
+		if err == nil {
+			break
+		}
+
+		utilities.Log(utilities.ERROR, "连接QuestDB失败，%d秒后重试: %v", retryInterval/time.Second, err)
+		time.Sleep(retryInterval)
+	}
 
 	if err != nil {
 		return nil, fmt.Errorf("连接QuestDB失败 |> %s", dataSourceName)
