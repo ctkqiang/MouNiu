@@ -5,6 +5,7 @@ import (
 	"mouniu/internal/config"
 	"mouniu/internal/model"
 	"mouniu/internal/utilities"
+	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -57,7 +58,22 @@ func GetMYSQLConnection() (*gorm.DB, error) {
 		config.MYSQL_CONFIG.Database,
 	)
 
-	database, err := gorm.Open(mysql.Open(dataSourceName), &gorm.Config{})
+	var database *gorm.DB
+	var err error
+	maxRetries := 10
+	retryInterval := 5 * time.Second
+
+	// 尝试连接MySQL，失败时重试
+	for i := 0; i < maxRetries; i++ {
+		database, err = gorm.Open(mysql.Open(dataSourceName), &gorm.Config{})
+		if err == nil {
+			break
+		}
+
+		utilities.Log(utilities.ERROR, "连接MySQL数据库失败，%d秒后重试: %v", retryInterval/time.Second, err)
+		time.Sleep(retryInterval)
+	}
+
 	if err != nil {
 		utilities.Error("%s", "连接MySQL数据库失败："+err.Error())
 		return nil, err
