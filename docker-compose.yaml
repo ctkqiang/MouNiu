@@ -13,8 +13,8 @@ services:
     environment:
       - APP_NAME=MouNiu
       - APP_PORT=8000
-      - QUESTDB_DB=questdb
-      - QUESTDB_HOST=questdb
+      - QUESTDB_DB=qdb
+      - QUESTDB_HOST=localhost
       - QUESTDB_USER=admin
       - QUESTDB_PASS=quest
       - QUESTDB_PORT=8812
@@ -36,6 +36,7 @@ services:
       - mouniu-network
 
 volumes:
+  mysql-data:
   questdb-data:
 
 networks:

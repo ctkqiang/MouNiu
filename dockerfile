@@ -31,13 +31,8 @@ COPY internal/config/ ./internal/config/
 # 暴露端口
 EXPOSE 8000
 
-# 设置环境变量默认值
-ENV APP_NAME=MouNiu
-ENV QUESTDB_DB=qdb
-ENV QUESTDB_HOST=localhost
-ENV QUESTDB_USER=admin
-ENV QUESTDB_PASS=quest
-ENV QUESTDB_PORT=8812
+# 复制环境变量文件
+COPY internal/config/.env ./internal/config/.env
 
 # 运行应用
 CMD ["./mouniu"]
