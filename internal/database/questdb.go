@@ -27,8 +27,8 @@ func GetQuestDatabaseConnection() (*gorm.DB, error) {
 
 	var questDB *gorm.DB
 	var err error
-	maxRetries := 10
-	retryInterval := 5 * time.Second
+	maxRetries := 30
+	retryInterval := 3 * time.Second
 
 	// 尝试连接QuestDB，失败时重试
 	for i := 0; i < maxRetries; i++ {
@@ -40,7 +40,7 @@ func GetQuestDatabaseConnection() (*gorm.DB, error) {
 			break
 		}
 
-		utilities.Log(utilities.ERROR, "连接QuestDB失败，%d秒后重试: %v", retryInterval/time.Second, err)
+		utilities.Log(utilities.ERROR, "连接QuestDB失败，%d秒后重试: %v (尝试 %d/%d)", retryInterval/time.Second, err, i+1, maxRetries)
 		time.Sleep(retryInterval)
 	}
 

@@ -14,10 +14,11 @@ services:
       - APP_NAME=MouNiu
       - APP_PORT=8000
       - QUESTDB_DB=qdb
-      - QUESTDB_HOST=localhost
+      - QUESTDB_HOST=questdb
       - QUESTDB_USER=admin
       - QUESTDB_PASS=quest
-      - QUESTDB_PORT=8812
+      - QUESTDB_PORT=8813
+      
     networks:
       - mouniu-network
 
@@ -27,16 +28,27 @@ services:
   questdb:
     image: questdb/questdb:latest
     ports:
-      - "9000:9000"  # Web控制台
-      - "8812:8812"  # PostgreSQL兼容端口
+      - "9001:9000"  # Web控制台 (避免与本地9000冲突)
+      - "8813:8812"  # PostgreSQL兼容端口 (避免与本地8812冲突)
+      - "9004:9003"  # 迷你HTTP服务器 (避免与本地9003冲突)
       - "9009:9009"  # InfluxDB行协议端口
     volumes:
       - questdb-data:/var/lib/questdb
+    environment:
+      - QDB_PG_PASSWORD=quest
+      - QDB_HTTP_ENABLED=true
+      - QDB_TCP_ENABLED=true
+      - QDB_PG_ENABLED=true
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9003"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
     networks:
       - mouniu-network
 
 volumes:
-  mysql-data:
   questdb-data:
 
 networks:
