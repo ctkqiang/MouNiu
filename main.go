@@ -9,6 +9,8 @@ import (
 	"mouniu/internal/routes"
 	"mouniu/internal/utilities"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -19,9 +21,26 @@ import (
 
 var (
 	SymbolsFile = "internal/config/symbols.txt"
-	Addr        = ":8000"
-	Port        = 8000
+	Addr        = fmt.Sprintf(":%d", getEnvAsInt("APP_PORT", 8000))
+	Port        = getEnvAsInt("APP_PORT", 8000)
 )
+
+// getEnv 获取环境变量，如果不存在则返回默认值
+func getEnv(key, defaultValue string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return defaultValue
+}
+
+// getEnvAsInt 获取环境变量并转换为整数，如果不存在或转换失败则返回默认值
+func getEnvAsInt(key string, defaultValue int) int {
+	valueStr := getEnv(key, "")
+	if value, err := strconv.Atoi(valueStr); err == nil {
+		return value
+	}
+	return defaultValue
+}
 
 // @title 牟牛 (MouNiu) 股票分析系统 API
 // @version 1.0

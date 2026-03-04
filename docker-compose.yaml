@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # 应用服务
+  mouniu:
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+      - questdb
+    environment:
+      - APP_NAME=MouNiu
+      - APP_PORT=8000
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=mouniu
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - QUESTDB_DB=questdb
+      - QUESTDB_HOST=questdb
+      - QUESTDB_USER=admin
+      - QUESTDB_PASS=quest
+      - QUESTDB_PORT=8812
+    networks:
+      - mouniu-network
+
+  # MySQL数据库服务
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=mouniu
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - mouniu-network
+
+  # QuestDB服务
+  questdb:
+    image: questdb/questdb:latest
+    ports:
+      - "9000:9000"  # Web控制台
+      - "8812:8812"  # PostgreSQL兼容端口
+      - "9009:9009"  # InfluxDB行协议端口
+    volumes:
+      - questdb-data:/var/lib/questdb
+    networks:
+      - mouniu-network
+
+volumes:
+  mysql-data:
+  questdb-data:
+
+networks:
+  mouniu-network:
+    driver: bridge
