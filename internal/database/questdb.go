@@ -18,11 +18,12 @@ var (
 
 func GetQuestDatabaseConnection() (*gorm.DB, error) {
 	dataSourceName := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=8812 sslmode=disable",
+		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
 		config.QUESTDB_CONFIG.Host,
 		config.QUESTDB_CONFIG.User,
 		config.QUESTDB_CONFIG.Password,
 		config.QUESTDB_CONFIG.Database,
+		config.QUESTDB_CONFIG.Port,
 	)
 
 	var questDB *gorm.DB

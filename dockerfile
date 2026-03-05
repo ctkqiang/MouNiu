@@ -31,8 +31,8 @@ COPY internal/config/ ./internal/config/
 # 暴露端口
 EXPOSE 8000
 
-# 复制环境变量文件
-COPY internal/config/.env ./internal/config/.env
+# 设置环境变量默认值
+ENV APP_NAME=MouNiu
 
 # 运行应用
 CMD ["./mouniu"]

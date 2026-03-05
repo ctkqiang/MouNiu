@@ -17,7 +17,7 @@ services:
       - QUESTDB_HOST=questdb
       - QUESTDB_USER=admin
       - QUESTDB_PASS=quest
-      - QUESTDB_PORT=8813
+      - QUESTDB_PORT=8812
       
     networks:
       - mouniu-network
@@ -29,7 +29,7 @@ services:
     image: questdb/questdb:latest
     ports:
       - "9001:9000"  # Web控制台 (避免与本地9000冲突)
-      - "8813:8812"  # PostgreSQL兼容端口 (避免与本地8812冲突)
+      - "8812:8812"  # PostgreSQL兼容端口
       - "9004:9003"  # 迷你HTTP服务器 (避免与本地9003冲突)
       - "9009:9009"  # InfluxDB行协议端口
     volumes:
@@ -39,6 +39,7 @@ services:
       - QDB_HTTP_ENABLED=true
       - QDB_TCP_ENABLED=true
       - QDB_PG_ENABLED=true
+      - QDB_PG_USER=admin
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "9003"]
       interval: 10s
